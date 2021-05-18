@@ -1,0 +1,33 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myValues">
+        <value>
+          <list size="17">
+            <item index="0" class="java.lang.String" itemvalue="i18n-label" />
+            <item index="1" class="java.lang.String" itemvalue="background-borders-theme" />
+            <item index="2" class="java.lang.String" itemvalue="big-theme" />
+            <item index="3" class="java.lang.String" itemvalue="small-theme" />
+            <item index="4" class="java.lang.String" itemvalue="column-theme" />
+            <item index="5" class="java.lang.String" itemvalue="background-theme" />
+            <item index="6" class="java.lang.String" itemvalue="small-icon" />
+            <item index="7" class="java.lang.String" itemvalue="md-icon" />
+            <item index="8" class="java.lang.String" itemvalue="i18n-placeholder" />
+            <item index="9" class="java.lang.String" itemvalue="i18n-title" />
+            <item index="10" class="java.lang.String" itemvalue="i18n-text" />
+            <item index="11" class="java.lang.String" itemvalue="i18n-leftbutton" />
+            <item index="12" class="java.lang.String" itemvalue="i18n-rightbutton" />
+            <item index="13" class="java.lang.String" itemvalue="multi-select__options-wrapper" />
+            <item index="14" class="java.lang.String" itemvalue="full-width" />
+            <item index="15" class="java.lang.String" itemvalue="no-margin" />
+            <item index="16" class="java.lang.String" itemvalue="user-validation--modal" />
+          </list>
+        </value>
+      </option>
+      <option name="myCustomValuesEnabled" value="true" />
+    </inspection_tool>
+    <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
+  </profile>
+</component>
