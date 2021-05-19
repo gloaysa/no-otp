@@ -1,37 +1,24 @@
 {
-  "manifest_version": 2,
-  "name": "NO+OTP",
-  "description": "Add to the input your password + OTP",
-  "version": "2.0",
-  "options_page": "options.html",
-  "icons": {
-    "48": "images/unlock-50.png",
-    "128": "images/unlock-128.png"
-  },
-  "browser_action": {
-    "default_popup": "popup.html",
-    "default_title": "NO+OTP"
-  },
-  "content_scripts": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "js/vendor.js",
-        "js/content_script.js"
-      ]
-    }
-  ],
-  "background": {
-    "scripts": [
-      "js/vendor.js",
-      "js/background.js"
-    ]
-  },
-  "permissions": [
-    "storage",
-    "<all_urls>",
-    "activeTab"
-  ]
+	"manifest_version": 2,
+	"name": "NO+OTP",
+	"description": "Add to the input your password + OTP",
+	"version": "2.0",
+	"options_page": "options.html",
+	"icons": {
+		"48": "images/unlock-50.png",
+		"128": "images/unlock-128.png"
+	},
+	"browser_action": {
+		"default_title": "NO+OTP"
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["js/vendor.js", "js/content_script.js"]
+		}
+	],
+	"background": {
+		"page": "index.html"
+	},
+	"permissions": ["storage", "activeTab"]
 }

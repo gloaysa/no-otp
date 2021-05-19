@@ -1,45 +1,68 @@
-import React, { useState } from 'react'
-import ReactDOM from 'react-dom'
-import QrReader from 'react-qr-reader'
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import QrReader from 'react-qr-reader';
 
 const Options = () => {
 	const toptRegex =
-		'otpauth:\\/\\/([ht]otp)\\/(?:[a-zA-Z0-9%]+:)?([^\\?]+)\\?secret=([0-9A-Za-z]+)(?:.*(?:<?counter=)([0-9]+))?'
+		'otpauth:\\/\\/([ht]otp)\\/(?:[a-zA-Z0-9%]+:)?([^\\?]+)\\?secret=([0-9A-Za-z]+)(?:.*(?:<?counter=)([0-9]+))?';
 
-	const [password, setPassword] = useState<string>('')
-	const [secret, setSecret] = useState<string>('')
-	const [status, setStatus] = useState<string>()
-	const [displayQr, setDisplayQr] = useState<boolean>(undefined)
+	const [pass, setPass] = useState<string>('');
+	const [secret, setSecret] = useState<string>('');
+	const [clipboard, setClipboard] = useState<boolean>(false);
+	const [popUp, setPopUp] = useState<boolean>(false);
+
+	const [status, setStatus] = useState<string>('');
+	const [displayQr, setDisplayQr] = useState<boolean>(undefined);
+
+	const [secretShow, setSecretShow] = useState<boolean>(false);
+	const [passShow, setPassShow] = useState<boolean>(false);
+
+	useEffect(() => {
+		chrome.storage.sync.get(
+			['secret', 'pass', 'clipboard', 'popUp'],
+			(key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
+				if (!secret) {
+					setPass(key.pass ? key.pass : '');
+					setSecret(key.secret ? key.secret : '');
+					setClipboard(key.clipboard);
+					setPopUp(key.popUp);
+				}
+			}
+		);
+	});
 
 	const saveOptions = () => {
 		// Saves options to chrome.storage.sync.
-		chrome.storage.sync.set(
-			{
-				pass: password,
-				secret: secret
-			},
-			() => {
-				// Update status to let user know options were saved.
-				setStatus('Options saved.')
-				const id = setTimeout(() => {
-					setStatus(undefined)
-				}, 1000)
-				return () => clearTimeout(id)
+		chrome.storage.sync.set({ pass, secret, clipboard, popUp }, () => {
+			let timeoutId;
+			let message;
+
+			if (popUp) {
+				message = { setting: 'popup' };
+			} else {
+				message = { setting: 'click' };
 			}
-		)
-	}
+
+			chrome.runtime.sendMessage(message, () => {
+				setStatus('Options saved.');
+				timeoutId = setTimeout(() => {
+					setStatus(undefined);
+				}, 1000);
+			});
+			return () => clearTimeout(timeoutId);
+		});
+	};
 
 	const handleScan = (data: string) => {
-		const re = data?.match(toptRegex)
+		const re = data?.match(toptRegex);
 		if (re) {
-			setSecret(re[3])
-			setDisplayQr(false)
-			console.log(re[3])
+			setSecret(re[3]);
+			setDisplayQr(false);
 		}
-	}
+	};
 	const handleError = (err) => {
-		console.error(err)
-	}
+		console.error(err);
+	};
 
 	const displayQrReader = () => {
 		if (displayQr) {
@@ -50,7 +73,7 @@ const Options = () => {
 					</button>
 					<QrReader delay={300} onError={handleError} onScan={handleScan} />
 				</div>
-			)
+			);
 		}
 
 		return (
@@ -59,19 +82,27 @@ const Options = () => {
 					Obtener credenciales con código QR
 				</button>
 			</div>
-		)
-	}
+		);
+	};
 
 	const displayNotification = () => {
 		if (status) {
-			return <div className="notification is-primary">{status}</div>
+			return <div className="notification is-primary">{status}</div>;
 		}
-	}
+		return (
+			<div className="field is-centered">
+				<button className="button is-info is-medium is-fullwidth" onClick={saveOptions} disabled={!secret}>
+					Guardar
+				</button>
+
+				<p className="help">Secret y contraseña quedarán guardadas en tu navegador, yo no almaceno ningún dato</p>
+			</div>
+		);
+	};
 
 	return (
 		<>
 			<div className="container">
-				{displayNotification()}
 				<section className="articles">
 					<div className="columns is-mobile">
 						<div className="column is-12-mobile is-8-desktop is-offset-2-desktop">
@@ -92,55 +123,100 @@ const Options = () => {
 									</div>
 
 									<div className="field is-centered">
-										<div className="control">
+										<label className="label">Secret</label>
+										<div className="control has-icons-right">
 											<input
 												className="input"
-												type="password"
+												type={secretShow ? 'text' : 'password'}
 												id="secret"
 												placeholder="SECRET"
 												onChange={(event) => setSecret(event.target.value)}
 												value={secret}
 											/>
+											<span
+												className="icon is-small is-right"
+												onClick={() => setSecretShow(!secretShow)}
+												style={{ cursor: 'pointer', pointerEvents: 'all' }}
+											>
+												<i className={`fas ${secretShow ? 'fa-eye' : 'fa-eye-slash'}`} />
+											</span>
 										</div>
 									</div>
 
 									<br />
 
-									<p>
-										De forma opcional, puedes ingresar aquí tu contraseña. Esta contraseña solo tienes que
-										proporcionarla en el caso de que tengas un formato contraseña + otp a la hora de logarte. Es poco
-										común, si no sabes de qué va esto, posiblemente no tengas que añadir nada en este campo.
-									</p>
-
-									<br />
 									<div className="field is-centered">
-										<div className="control">
+										<label className="label">Password</label>
+										<div className="control has-icons-right">
 											<input
 												className="input"
-												type="password"
+												type={passShow ? 'text' : 'password'}
 												id="password"
 												placeholder="PASSWORD (optional)"
-												onChange={(event) => setPassword(event.target.value)}
-												value={password}
+												onChange={(event) => setPass(event.target.value)}
+												value={pass}
 											/>
+											<span
+												className="icon is-small is-right"
+												onClick={() => setPassShow(!passShow)}
+												style={{ cursor: 'pointer', pointerEvents: 'all' }}
+											>
+												<i className={`fas ${passShow ? 'fa-eye' : 'fa-eye-slash'}`} />
+											</span>
 										</div>
 										<p className="help">
-											Secret y contraseña quedarán guardadas en tu navegador, yo no almaceno ningún dato
+											De forma opcional, puedes ingresar aquí tu contraseña. Esta contraseña solo tienes que
+											proporcionarla en el caso de que tengas un formato contraseña + otp a la hora de logarte. Es poco
+											común, si no sabes de qué va esto, posiblemente no tengas que añadir nada en este campo.
 										</p>
 									</div>
+
+									<br />
+
 									<div className="field is-centered">
-										<button
-											className="button is-info is-medium is-full-mobile"
-											onClick={saveOptions}
-											disabled={!secret}
-										>
-											Guardar
-										</button>
+										<div className="control">
+											<label className="checkbox">
+												<input
+													type="checkbox"
+													onChange={(event) => setClipboard(event.target.checked)}
+													checked={clipboard}
+												/>{' '}
+												Guardar en el portapapeles
+											</label>
+										</div>
+										<p className="help">
+											Si seleccionas esta opción, la OTP (más la contraseña si la proporcionas) quedará en tu
+											portapapeles al clicar en el plugin.
+										</p>
 									</div>
+
+									<br />
+
+									<div className="field is-centered">
+										<div className="control">
+											<label className="checkbox">
+												<input type="checkbox" onChange={(event) => setPopUp(event.target.checked)} checked={popUp} />{' '}
+												Muestra un popup al clicar la extensión
+											</label>
+										</div>
+										<p className="help">
+											Al marcar esta opción, se mostrará un popup al clicar en la extensión. Desde ahí podrás elegir si
+											quieres que la OTP te rellene una contraseña o que se guarde en el portapapeles.
+										</p>
+									</div>
+
+									<br />
+
+									{displayNotification()}
+
+									<hr />
 
 									<p>
 										Para usarlo, ve a la página de iniciar sesión del servicio que te pide OTP y simplemente clica en el
 										botón de la extensión, colocará la contraseña e iniciará sesión automáticamente.
+										<br />
+										Si has elegido que se guarde en el portapapeles, podrás usar la extensión en cualquier página, sin
+										necesidad de que exista un formulario.
 									</p>
 
 									<br />
@@ -170,17 +246,17 @@ const Options = () => {
 					</p>
 					<div className="tags has-addons level-item">
 						<span className="tag is-rounded is-info">last update</span>
-						<span className="tag is-rounded">September, 2019</span>
+						<span className="tag is-rounded">May, 2021</span>
 					</div>
 				</div>
 			</footer>
 		</>
-	)
-}
+	);
+};
 
 ReactDOM.render(
 	<React.StrictMode>
 		<Options />
 	</React.StrictMode>,
 	document.getElementById('root')
-)
+);

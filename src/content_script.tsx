@@ -1,15 +1,19 @@
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+console.log('content script root');
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+	console.log('content script', sender);
+
 	if (msg.user) {
-		const input: HTMLInputElement = document.querySelectorAll("input[type='password']")[0] as HTMLInputElement
+		const input: HTMLInputElement = document.querySelectorAll("input[type='password']")[0] as HTMLInputElement;
 
-		if (input) {
-			input.setAttribute('type', 'text')
-
-			input.value = msg.user.password + msg.user.otp
-			const form = input.closest('form')
-			form.submit();
+		if (!input) {
+			return alert('No he encontrado donde poner la contraseña ☹️');
 		}
 
-		sendResponse(input?.value)
+		input.value = msg.user.password + msg.user.otp;
+		const form = input.closest('form');
+		form.submit();
+
+		sendResponse(input?.value);
 	}
-})
+});
