@@ -14,27 +14,23 @@ This is a Chrome Extension app written in React.
 * dist: Chrome Extension directory
 * dist/js: Generated JavaScript files
 
-## Setup
+## Install the Plugin
 
-```
-npm install
-```
+You can install this plugin [here](https://chrome.google.com/webstore/detail/no%20otp/epfcbfnadaigbokbekcipecemoaiaeni)
 
-## Build
+If you prefer to install a local version of it from this repository:
 
-```
-npm run build
-```
+ - Download the repo with `git clone git@github.com:gloaysa/no-otp.git`
+ - Install the dependencies: `npm install`
+ - Build it with `npm run build`
+ - Then go to chrome://extensions/ and activate the developer mode (if not active) at the right top corner.
+ - Click on Load Unpacked and load the `dist` folder.
 
 ## Build in watch mode
 
 ```
 npm run watch
 ```
-
-## Load extension to chrome
-
-Load `dist` directory
 
 ## Test
 `npx jest` or `npm run test`
