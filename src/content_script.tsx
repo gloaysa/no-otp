@@ -1,6 +1,6 @@
 console.log('content script root');
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((msg, sender) => {
 	console.log('content script', sender);
 
 	if (msg.user) {
@@ -13,7 +13,5 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		input.value = msg.user.password + msg.user.otp;
 		const form = input.closest('form');
 		form.submit();
-
-		sendResponse(input?.value);
 	}
 });

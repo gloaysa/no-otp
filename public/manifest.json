@@ -2,8 +2,17 @@
 	"manifest_version": 2,
 	"name": "NO+OTP",
 	"description": "Add to the input your password + OTP",
-	"version": "2.0",
-	"options_page": "options.html",
+	"version": "1.0.3",
+	"options_ui": {
+		"page": "options.html",
+		"browser_style": true
+	},
+	"browser_specific_settings": {
+		"gecko": {
+			"strict_min_version": "51.0",
+			"id": "{331d643d-ad4b-414f-b884-90c1cf38ccab}"
+		}
+	},
 	"icons": {
 		"48": "images/unlock-50.png",
 		"128": "images/unlock-128.png"
@@ -11,14 +20,8 @@
 	"browser_action": {
 		"default_title": "NO+OTP"
 	},
-	"content_scripts": [
-		{
-			"matches": ["<all_urls>"],
-			"js": ["js/vendor.js", "js/content_script.js"]
-		}
-	],
 	"background": {
 		"page": "index.html"
 	},
-	"permissions": ["storage", "activeTab"]
+	"permissions": ["storage", "activeTab", "clipboardWrite"]
 }

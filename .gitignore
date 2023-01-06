@@ -3,3 +3,8 @@ node_modules/
 dist/
 tmp/
 .idea/
+.idea
+dist.zip
+NO+otp.crx
+plugin
+web-ext-artifacts
