@@ -24,9 +24,8 @@ const Popup = () => {
 		chrome.runtime.openOptionsPage();
 	};
 
-	chrome.storage.sync.get(
-		['secret', 'pass', 'clipboard'],
-		(key: { secret: string; pass: string; clipboard: boolean }) => {
+	browser.storage.sync.get(['secret', 'pass', 'clipboard'])
+		.then((key: { secret: string; pass: string; clipboard: boolean }) => {
 			if (!key.secret) {
 				return goToOptions();
 			}
@@ -40,8 +39,7 @@ const Popup = () => {
 			}
 
 			setOtp(totp?.getOTP());
-		}
-	);
+		});
 
 	return (
 		<div style={{ minWidth: '300px' }}>

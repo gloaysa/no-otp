@@ -18,39 +18,39 @@ const Options = () => {
 	const [passShow, setPassShow] = useState<boolean>(false);
 
 	useEffect(() => {
-		chrome.storage.sync.get(
-			['secret', 'pass', 'clipboard', 'popUp'],
-			(key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
+		const storage = browser.storage.sync.get(['secret', 'pass', 'clipboard', 'popUp'])
+			.then((key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
 				if (!secret) {
 					setPass(key.pass ? key.pass : '');
 					setSecret(key.secret ? key.secret : '');
 					setClipboard(key.clipboard);
 					setPopUp(key.popUp);
 				}
-			}
-		);
+			});
+
 	});
 
 	const saveOptions = () => {
-		// Saves options to chrome.storage.sync.
-		chrome.storage.sync.set({ pass, secret, clipboard, popUp }, () => {
-			let timeoutId;
-			let message;
+		// Saves options to browser.storage.sync.
+		browser.storage.sync.set({ pass, secret, clipboard, popUp })
+			.then(() => {
+				let timeoutId;
+				let message;
 
-			if (popUp) {
-				message = { setting: 'popup' };
-			} else {
-				message = { setting: 'click' };
-			}
+				if (popUp) {
+					message = { setting: 'popup' };
+				} else {
+					message = { setting: 'click' };
+				}
 
-			chrome.runtime.sendMessage(message, () => {
-				setStatus('Options saved.');
-				timeoutId = setTimeout(() => {
-					setStatus(undefined);
-				}, 1000);
+				browser.runtime.sendMessage(message, () => {
+					setStatus('Options saved.');
+					timeoutId = setTimeout(() => {
+						setStatus(undefined);
+					}, 1000);
+				});
+				return () => clearTimeout(timeoutId);
 			});
-			return () => clearTimeout(timeoutId);
-		});
 	};
 
 	const handleScan = (data: string) => {
@@ -246,7 +246,7 @@ const Options = () => {
 					</p>
 					<div className="tags has-addons level-item">
 						<span className="tag is-rounded is-info">last update</span>
-						<span className="tag is-rounded">May, 2021</span>
+						<span className="tag is-rounded">January, 2023</span>
 					</div>
 				</div>
 			</footer>

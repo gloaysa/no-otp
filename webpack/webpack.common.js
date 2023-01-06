@@ -11,7 +11,7 @@ module.exports = {
 		content_script: path.join(srcDir, 'content_script.tsx'),
 	},
 	output: {
-		path: path.join(__dirname, '../dist/js'),
+		path: path.join(__dirname, '../plugin/js'),
 		filename: '[name].js',
 	},
 	optimization: {
