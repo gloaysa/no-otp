@@ -21,7 +21,6 @@ This is a Chrome Extension app written in React.
 * src/typescript: TypeScript source files
 * src/assets: static files
 * plugin: Browser Extension directory
-* dist/js: Generated JavaScript files
 
 ## Install the Plugin
 
