@@ -8,10 +8,9 @@ module.exports = {
 		popup: path.join(srcDir, 'popup.tsx'),
 		options: path.join(srcDir, 'options.tsx'),
 		index: path.join(srcDir, 'index.ts'),
-		content_script: path.join(srcDir, 'content_script.tsx'),
 	},
 	output: {
-		path: path.join(__dirname, '../dist/js'),
+		path: path.join(__dirname, '../plugin/js'),
 		filename: '[name].js',
 	},
 	optimization: {
