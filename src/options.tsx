@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { QrReader } from 'react-qr-reader';
+import { api } from './api';
 
 const Options = () => {
 	const toptRegex =
@@ -19,8 +20,9 @@ const Options = () => {
 	const [passShow, setPassShow] = useState<boolean>(false);
 
 	useEffect(() => {
-		const storage = browser.storage.sync.get(['secret', 'pass', 'clipboard', 'popUp'])
-			.then((key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
+		const storage = api.storage.getStorageItems(
+			['secret', 'pass', 'clipboard', 'popUp'],
+			(key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
 				if (!secret) {
 					setPass(key.pass ? key.pass : '');
 					setSecret(key.secret ? key.secret : '');
@@ -30,34 +32,31 @@ const Options = () => {
 				}
 			}
 		);
-
 		setFillInput(!popUp && !clipboard);
 	});
 
 	const saveOptions = () => {
-		// Saves options to browser.storage.sync.
-		browser.storage.sync.set({ pass, secret, clipboard, popUp })
-			.then(() => {
-				let timeoutId: NodeJS.Timeout;
-				let message: { setting: string; };
+		api.storage.setStorageItems({ pass, secret, clipboard, popUp }, () => {
+			let timeoutId: NodeJS.Timeout;
+			let message: { setting: string };
 
-				if (popUp) {
-					message = { setting: 'popup' };
-				} else {
-					message = { setting: 'click' };
-				}
+			if (popUp) {
+				message = { setting: 'popup' };
+			} else {
+				message = { setting: 'click' };
+			}
 
-				browser.runtime.sendMessage(message).then(() => {
-					setStatus('Options saved.');
-					timeoutId = setTimeout(() => {
-						setStatus(undefined);
-					}, 1000);
-				});
-				return () => clearTimeout(timeoutId);
+			api.runtime.sendMessage(message, () => {
+				setStatus('Options saved.');
+				timeoutId = setTimeout(() => {
+					setStatus(undefined);
+				}, 1000);
 			});
+			return () => clearTimeout(timeoutId);
+		});
 	};
 
-	const handleQrResult = (result: { getText: () => string; }, error: Error) => {
+	const handleQrResult = (result: { getText: () => string }, error: Error) => {
 		if (result) {
 			const data = result.getText();
 			const re = data?.match(toptRegex);
@@ -69,7 +68,7 @@ const Options = () => {
 		if (error) {
 			// console.error(err);
 		}
-	}
+	};
 
 	const handleSetPopUp = (value: boolean) => {
 		if (value) {
@@ -77,7 +76,7 @@ const Options = () => {
 			setFillInput(false);
 		}
 		setPopUp(value);
-	}
+	};
 
 	const handleSetClipboard = (value: boolean) => {
 		if (value) {
@@ -85,7 +84,7 @@ const Options = () => {
 			setFillInput(false);
 		}
 		setClipboard(true);
-	}
+	};
 
 	const handleSetFillInput = (value: boolean) => {
 		if (value) {
@@ -93,7 +92,7 @@ const Options = () => {
 			setClipboard(false);
 		}
 		setFillInput(true);
-	}
+	};
 
 	const displayQrReader = () => {
 		if (displayQr) {
@@ -102,7 +101,7 @@ const Options = () => {
 					<button className="button is-warning is-fullwidth" onClick={() => setDisplayQr(false)}>
 						Cerrar lector
 					</button>
-					<QrReader onResult={handleQrResult}  constraints={{ autoGainControl: false }}/>
+					<QrReader onResult={handleQrResult} constraints={{ autoGainControl: false }} />
 				</div>
 			);
 		}
@@ -216,7 +215,9 @@ const Options = () => {
 											</label>
 										</div>
 										<p className="help">
-											Si seleccionas esta opción, la OTP (más la contraseña si la proporcionas) intentará rellenar el input de la contraseña automáticamente. Si ves que no funciona correctamente, selecciona una de las opciones de abajo en su lugar.
+											Si seleccionas esta opción, la OTP (más la contraseña si la proporcionas) intentará rellenar el
+											input de la contraseña automáticamente. Si ves que no funciona correctamente, selecciona una de
+											las opciones de abajo en su lugar.
 										</p>
 									</div>
 
@@ -242,7 +243,11 @@ const Options = () => {
 									<div className="field is-centered">
 										<div className="control">
 											<label className="checkbox">
-												<input type="checkbox" onChange={(event) => handleSetPopUp(event.target.checked)} checked={popUp} />{' '}
+												<input
+													type="checkbox"
+													onChange={(event) => handleSetPopUp(event.target.checked)}
+													checked={popUp}
+												/>{' '}
 												Muestra un popup al clicar la extensión
 											</label>
 										</div>

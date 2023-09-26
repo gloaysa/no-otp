@@ -1,5 +1,7 @@
+import { api } from '../api';
+
 export const fillInput = async (password: string, otp: number) => {
-	await browser.tabs.executeScript({
+	await api.tabs.executeScript({
 		code: `
 				if (!document.querySelectorAll("input[type='password']")[0]) {
 				alert('No he encontrado donde poner la contraseña ☹️');

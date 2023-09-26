@@ -1,6 +1,6 @@
 {
   "name": "no-otp",
-  "version": "1.0.4",
+  "version": "3",
   "description": "Add to the input your OTP",
   "main": "index.js",
   "scripts": {

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import TOTP from './lib/TOTP';
 import { copyToClipboard } from './utils/copy-to-clipboard';
 import { fillInput } from './utils/fill-input';
+import { api } from './api';
 
 const Popup = () => {
 	const [totp, setTotp] = useState(null);
@@ -24,8 +25,9 @@ const Popup = () => {
 		chrome.runtime.openOptionsPage();
 	};
 
-	browser.storage.sync.get(['secret', 'pass', 'clipboard'])
-		.then((key: { secret: string; pass: string; clipboard: boolean }) => {
+	api.storage.getStorageItems(
+		['secret', 'pass', 'clipboard'],
+		(key: { secret: string; pass: string; clipboard: boolean }) => {
 			if (!key.secret) {
 				return goToOptions();
 			}
@@ -39,10 +41,11 @@ const Popup = () => {
 			}
 
 			setOtp(totp?.getOTP());
-		});
+		}
+	);
 
 	return (
-		<div style={{ minWidth: '300px' }}>
+		<div style={{ display: 'flex' }}>
 			<button onClick={copyOtpToClipboard} style={{ marginRight: '5px' }}>
 				Copiar al portapapeles
 			</button>

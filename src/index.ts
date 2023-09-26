@@ -1,35 +1,32 @@
 import TOTP from './lib/TOTP';
 import { copyToClipboard } from './utils/copy-to-clipboard';
 import { fillInput } from './utils/fill-input';
+import { api } from './api';
 
 // Uncomment this block to reset the secret for debugging purposes
-/*
-	browser.storage.sync.set({
-		pass: null,
-		secret: null
-	});
-	*/
+/*api.storage.setStorageItems({
+	pass: null,
+	secret: null,
+});*/
 
-browser.storage.sync.get(['popUp'])
-	.then(
-		(key: { popUp: boolean }) => {
-			if (key.popUp) {
-				chrome.browserAction.setPopup({ popup: '../popup.html' });
-			} else {
-				chrome.browserAction.setPopup({ popup: '' });
-			}
-		},
-	);
+api.storage.getStorageItems(['popUp'], (key: { popUp: boolean }) => {
+	if (key.popUp) {
+		api.browserAction.setBrowserActionPopup('../popup.html');
+	} else {
+		api.browserAction.setBrowserActionPopup('');
+	}
+});
 
-browser.browserAction.onClicked.addListener(() => {
+api.browserAction.onClicked(() => {
 	let clipboard: boolean;
 	let password: string;
 	let totp: TOTP;
 
-	browser.storage.sync.get(['secret', 'pass', 'clipboard'])
-		.then((key: { secret: string; pass: string; clipboard: boolean }) => {
+	api.storage.getStorageItems(
+		['secret', 'pass', 'clipboard'],
+		(key: { secret: string; pass: string; clipboard: boolean }) => {
 			if (!key.secret) {
-				browser.runtime.openOptionsPage();
+				api.runtime.openOptionsPage();
 			}
 
 			clipboard = key.clipboard;
@@ -45,23 +42,24 @@ browser.browserAction.onClicked.addListener(() => {
 			}
 
 			fillInput(password, totp?.getOTP());
-		});
+		}
+	);
 });
 
-browser.runtime.onMessage.addListener(function(request, sender) {
+api.runtime.onMessage(function (request, sender) {
 	if (request.setting == 'popup') {
-		browser.browserAction.setPopup({ popup: '../popup.html' });
+		api.browserAction.setBrowserActionPopup('../popup.html');
 	}
 
 	if (request.setting == 'click') {
-		browser.browserAction.setPopup({ popup: '' });
+		api.browserAction.setBrowserActionPopup('');
 	}
 });
 
-browser.runtime.onMessage.addListener((msg, sender) => {
+api.runtime.onMessage((msg, sender) => {
 	return new Promise((resolve) => {
 		if (msg.user) {
-			const input: HTMLInputElement = document.querySelectorAll('input[type=\'password\']')[0] as HTMLInputElement;
+			const input: HTMLInputElement = document.querySelectorAll("input[type='password']")[0] as HTMLInputElement;
 
 			if (!input) {
 				alert('No he encontrado donde poner la contraseña ☹️');
