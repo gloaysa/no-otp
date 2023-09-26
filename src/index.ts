@@ -10,6 +10,17 @@ import { fillInput } from './utils/fill-input';
 	});
 	*/
 
+browser.storage.sync.get(['popUp'])
+	.then(
+		(key: { popUp: boolean }) => {
+			if (key.popUp) {
+				chrome.browserAction.setPopup({ popup: '../popup.html' });
+			} else {
+				chrome.browserAction.setPopup({ popup: '' });
+			}
+		},
+	);
+
 browser.browserAction.onClicked.addListener(() => {
 	let clipboard: boolean;
 	let password: string;
@@ -37,7 +48,7 @@ browser.browserAction.onClicked.addListener(() => {
 		});
 });
 
-browser.runtime.onMessage.addListener(function (request, sender) {
+browser.runtime.onMessage.addListener(function(request, sender) {
 	if (request.setting == 'popup') {
 		browser.browserAction.setPopup({ popup: '../popup.html' });
 	}
@@ -45,4 +56,25 @@ browser.runtime.onMessage.addListener(function (request, sender) {
 	if (request.setting == 'click') {
 		browser.browserAction.setPopup({ popup: '' });
 	}
+});
+
+browser.runtime.onMessage.addListener((msg, sender) => {
+	return new Promise((resolve) => {
+		if (msg.user) {
+			const input: HTMLInputElement = document.querySelectorAll('input[type=\'password\']')[0] as HTMLInputElement;
+
+			if (!input) {
+				alert('No he encontrado donde poner la contraseña ☹️');
+				resolve('No input element found');
+			} else {
+				input.value = msg.user.password + msg.user.otp;
+				const form = input.closest('form');
+				form.submit();
+
+				resolve(input?.value);
+			}
+		} else {
+			resolve(null);
+		}
+	});
 });
