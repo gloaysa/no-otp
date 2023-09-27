@@ -1,0 +1,51 @@
+body {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.popup-container {
+    /*width: 200px;*/
+    /*padding: 20px;*/
+    text-align: center;
+}
+
+.popup-container.light {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.popup-container.dark {
+    background-color: #36363A;
+    color: #ffffff;
+}
+
+button {
+    margin: 10px;
+    padding: 8px 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.options {
+    display: flex;
+    justify-content: center;
+}
+
+.option {
+    transition: background-color 0.3s ease;
+}
+
+.option.light {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.option.dark {
+    background-color: #36363A;
+    color: #ffffff;
+}
+
+.option:hover {
+    background-color: #505050;
+}

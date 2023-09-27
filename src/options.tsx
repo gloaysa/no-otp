@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { QrReader } from 'react-qr-reader';
 import { api } from './api';
+import { useTranslation } from 'react-i18next';
+import './i18n/i18n';
 
 const Options = () => {
 	const toptRegex =
@@ -19,21 +21,28 @@ const Options = () => {
 	const [secretShow, setSecretShow] = useState<boolean>(false);
 	const [passShow, setPassShow] = useState<boolean>(false);
 
+	const { t } = useTranslation();
+
 	useEffect(() => {
-		const storage = api.storage.getStorageItems(
+		api.storage.getStorageItems(
 			['secret', 'pass', 'clipboard', 'popUp'],
 			(key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
 				if (!secret) {
 					setPass(key.pass ? key.pass : '');
 					setSecret(key.secret ? key.secret : '');
-					setClipboard(key.clipboard);
-					setPopUp(key.popUp);
+					setClipboard(!!key.clipboard);
+					setPopUp(!!key.popUp);
 					setFillInput(!key.clipboard && !key.popUp);
 				}
 			}
 		);
 		setFillInput(!popUp && !clipboard);
-	});
+	}, []);
+
+	useEffect(() => {
+		// ensure that if no checkbox is selected, we select the default one
+		setFillInput(!clipboard && !popUp);
+	}, [clipboard, popUp]);
 
 	const saveOptions = () => {
 		api.storage.setStorageItems({ pass, secret, clipboard, popUp }, () => {
@@ -47,7 +56,7 @@ const Options = () => {
 			}
 
 			api.runtime.sendMessage(message, () => {
-				setStatus('Options saved.');
+				setStatus(t('options.settingsSaved'));
 				timeoutId = setTimeout(() => {
 					setStatus(undefined);
 				}, 1000);
@@ -83,7 +92,7 @@ const Options = () => {
 			setPopUp(false);
 			setFillInput(false);
 		}
-		setClipboard(true);
+		setClipboard(value);
 	};
 
 	const handleSetFillInput = (value: boolean) => {
@@ -99,7 +108,7 @@ const Options = () => {
 			return (
 				<div className="column is-centered">
 					<button className="button is-warning is-fullwidth" onClick={() => setDisplayQr(false)}>
-						Cerrar lector
+						{t('options.qr.close')}
 					</button>
 					<QrReader onResult={handleQrResult} constraints={{ autoGainControl: false }} />
 				</div>
@@ -109,7 +118,7 @@ const Options = () => {
 		return (
 			<div className="column is-centered">
 				<button className="button is-info is-fullwidth" onClick={() => setDisplayQr(true)}>
-					Obtener credenciales con código QR
+					{t('options.qr.open')}
 				</button>
 			</div>
 		);
@@ -122,10 +131,10 @@ const Options = () => {
 		return (
 			<div className="field is-centered">
 				<button className="button is-info is-medium is-fullwidth" onClick={saveOptions} disabled={!secret}>
-					Guardar
+					{t('general.save')}
 				</button>
 
-				<p className="help">Secret y contraseña quedarán guardadas en tu navegador, yo no almaceno ningún dato</p>
+				<p className='help'>{t('options.disclaimer')}</p>
 			</div>
 		);
 	};
@@ -153,13 +162,13 @@ const Options = () => {
 									</div>
 
 									<div className="field is-centered">
-										<label className="label">Secret</label>
+										<label className='label'>{t('options.form.secret')}</label>
 										<div className="control has-icons-right">
 											<input
 												className="input"
 												type={secretShow ? 'text' : 'password'}
 												id="secret"
-												placeholder="SECRET"
+												placeholder={t('options.form.secret')}
 												onChange={(event) => setSecret(event.target.value)}
 												value={secret}
 											/>
@@ -176,15 +185,16 @@ const Options = () => {
 									<br />
 
 									<div className="field is-centered">
-										<label className="label">Password</label>
+										<label className='label'>{t('options.form.password')}</label>
 										<div className="control has-icons-right">
 											<input
 												className="input"
 												type={passShow ? 'text' : 'password'}
 												id="password"
-												placeholder="PASSWORD (optional)"
+												placeholder={t('options.form.password')}
 												onChange={(event) => setPass(event.target.value)}
 												value={pass}
+												disabled={!secret}
 											/>
 											<span
 												className="icon is-small is-right"
@@ -195,9 +205,7 @@ const Options = () => {
 											</span>
 										</div>
 										<p className="help">
-											De forma opcional, puedes ingresar aquí tu contraseña. Esta contraseña solo tienes que
-											proporcionarla en el caso de que tengas un formato contraseña + otp a la hora de logarte. Es poco
-											común, si no sabes de qué va esto, posiblemente no tengas que añadir nada en este campo.
+											{t('options.form.passwordExplanation')}
 										</p>
 									</div>
 
@@ -205,55 +213,52 @@ const Options = () => {
 
 									<div className="field is-centered">
 										<div className="control">
-											<label className="checkbox">
+											<label className='radio'>
 												<input
-													type="checkbox"
+													type='radio'
 													onChange={(event) => handleSetFillInput(event.target.checked)}
 													checked={fillInput}
+													disabled={!secret}
 												/>{' '}
-												Rellenar input automáticamente
+												{t('options.form.checkbox.autoFill')}
 											</label>
 										</div>
 										<p className="help">
-											Si seleccionas esta opción, la OTP (más la contraseña si la proporcionas) intentará rellenar el
-											input de la contraseña automáticamente. Si ves que no funciona correctamente, selecciona una de
-											las opciones de abajo en su lugar.
+											{t('options.form.checkbox.autoFillExplanation')}
 										</p>
 									</div>
 
 									<div className="field is-centered">
 										<div className="control">
-											<label className="checkbox">
+											<label className='radio'>
 												<input
-													type="checkbox"
+													type='radio'
 													onChange={(event) => handleSetClipboard(event.target.checked)}
 													checked={clipboard}
+													disabled={!secret}
 												/>{' '}
-												Guardar en el portapapeles
+												{t('options.form.checkbox.clipboard')}
 											</label>
 										</div>
 										<p className="help">
-											Si seleccionas esta opción, la OTP (más la contraseña si la proporcionas) quedará en tu
-											portapapeles al clicar en el plugin.
+											{t('options.form.checkbox.clipboardExplanation')}
 										</p>
 									</div>
 
-									<br />
-
 									<div className="field is-centered">
 										<div className="control">
-											<label className="checkbox">
+											<label className='radio'>
 												<input
-													type="checkbox"
+													type='radio'
 													onChange={(event) => handleSetPopUp(event.target.checked)}
 													checked={popUp}
+													disabled={!secret}
 												/>{' '}
-												Muestra un popup al clicar la extensión
+												{t('options.form.checkbox.popUp')}
 											</label>
 										</div>
 										<p className="help">
-											Al marcar esta opción, se mostrará un popup al clicar en la extensión. Desde ahí podrás elegir si
-											quieres que la OTP te rellene una contraseña o que se guarde en el portapapeles.
+											{t('options.form.checkbox.popUpExplanation')}
 										</p>
 									</div>
 
@@ -263,12 +268,11 @@ const Options = () => {
 
 									<hr />
 
-									<p>
-										Para usarlo, ve a la página de iniciar sesión del servicio que te pide OTP y simplemente clica en el
-										botón de la extensión, colocará la contraseña e iniciará sesión automáticamente.
-										<br />
-										Si has elegido que se guarde en el portapapeles, podrás usar la extensión en cualquier página, sin
-										necesidad de que exista un formulario.
+									<p className='content'>
+										{t('options.howTo.p1')}
+									</p>
+									<p className='content'>
+										{t('options.howTo.p2')}
 									</p>
 
 									<br />
@@ -293,12 +297,13 @@ const Options = () => {
 			<footer className="footer">
 				<div className="content has-text-centered">
 					<p>
-						<strong>NO+OTP</strong> - made with <span className="has-text-danger">&hearts;</span> by{' '}
+						<strong>NO+OTP</strong> - {t('footer.madeWith')} <span
+						className='has-text-danger'>&hearts;</span> {t('footer.by')}{' '}
 						<a href="https://loaysa.com">Guillermo Loaysa</a>
 					</p>
 					<div className="tags has-addons level-item">
-						<span className="tag is-rounded is-info">last update</span>
-						<span className="tag is-rounded">Sept, 2023</span>
+						<span className='tag is-rounded is-info'>{t('footer.lastUpdate')}</span>
+						<span className='tag is-rounded'>09 - 2023</span>
 					</div>
 				</div>
 			</footer>

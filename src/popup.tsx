@@ -1,15 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import TOTP from './lib/TOTP';
 import { copyToClipboard } from './utils/copy-to-clipboard';
 import { fillInput } from './utils/fill-input';
 import { api } from './api';
+import './i18n/i18n';
+import './popup.css';
+import { useTranslation } from 'react-i18next';
 
 const Popup = () => {
+	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 	const [totp, setTotp] = useState(null);
 	const [otp, setOtp] = useState(null);
 	const [password, setPassword] = useState<string>();
 	const [clipboard, setClipboard] = useState<boolean>();
+	const { t } = useTranslation();
+
+	useEffect(() => {
+		// Listen for theme changes in the browser
+		chrome.storage.sync.get(['theme'], (result) => {
+			if (result.theme) {
+				setTheme(result.theme);
+			}
+		});
+
+		// Detect theme changes in Firefox
+		if (typeof browser !== 'undefined' && browser.storage) {
+			browser.storage.onChanged.addListener((changes) => {
+				if (changes.theme) {
+					setTheme(changes.theme.newValue);
+				}
+			});
+		}
+	}, []);
+
+	function toggleTheme() {
+		const newTheme = theme === 'light' ? 'dark' : 'light';
+		setTheme(newTheme);
+	}
 
 	const fillOtp = () => {
 		setOtp(totp.otp);
@@ -41,22 +69,24 @@ const Popup = () => {
 			}
 
 			setOtp(totp?.getOTP());
-		}
+		},
 	);
 
 	return (
-		<div style={{ display: 'flex' }}>
-			<button onClick={copyOtpToClipboard} style={{ marginRight: '5px' }}>
-				Copiar al portapapeles
-			</button>
+		<div className={`popup-container ${theme}`}>
+			<div className='options'>
+				<button className={`option ${theme}`} onClick={copyOtpToClipboard}>
+					{t('popup.clipboard')}
+				</button>
 
-			<button onClick={fillOtp} style={{ marginRight: '5px' }}>
-				Rellenar contraseña
-			</button>
+				<button className={`option ${theme}`} onClick={fillOtp}>
+					{t('popup.fillPassword')}
+				</button>
 
-			<button onClick={goToOptions} style={{ marginRight: '5px' }}>
-				Opciones
-			</button>
+				<button className={`option ${theme}`} onClick={goToOptions}>
+					{t('popup.options')}
+				</button>
+			</div>
 		</div>
 	);
 };
@@ -65,5 +95,5 @@ ReactDOM.render(
 	<React.StrictMode>
 		<Popup />
 	</React.StrictMode>,
-	document.getElementById('root')
+	document.getElementById('root'),
 );
