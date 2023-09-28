@@ -7,6 +7,7 @@ import { api } from './api';
 import './i18n/i18n';
 import './popup.css';
 import { useTranslation } from 'react-i18next';
+import { StorageItems } from './interfaces/storage-items.interface';
 
 const Popup = () => {
 	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -41,12 +42,13 @@ const Popup = () => {
 
 	const fillOtp = () => {
 		setOtp(totp.otp);
-
-		fillInput(password, totp?.getOTP());
+		const passWithOtp = (password ?? '') + totp?.getOTP();
+		fillInput(passWithOtp);
 	};
 
 	const copyOtpToClipboard = () => {
-		copyToClipboard(password + totp.otp);
+		const passWithOtp = (password ?? '') + totp?.getOTP();
+		copyToClipboard(passWithOtp);
 	};
 
 	const goToOptions = () => {
@@ -55,7 +57,7 @@ const Popup = () => {
 
 	api.storage.getStorageItems(
 		['secret', 'pass', 'clipboard'],
-		(key: { secret: string; pass: string; clipboard: boolean }) => {
+		(key: StorageItems) => {
 			if (!key.secret) {
 				return goToOptions();
 			}

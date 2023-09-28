@@ -2,6 +2,8 @@ import TOTP from './lib/TOTP';
 import { copyToClipboard } from './utils/copy-to-clipboard';
 import { fillInput } from './utils/fill-input';
 import { api } from './api';
+import { StorageItems } from './interfaces/storage-items.interface';
+import { RuntimeMessage, RuntimeMessageId } from './interfaces/runtime-message.interface';
 
 // Uncomment this block to reset the secret for debugging purposes
 /*api.storage.setStorageItems({
@@ -9,8 +11,8 @@ import { api } from './api';
 	secret: null,
 });*/
 
-api.storage.getStorageItems(['popUp'], (key: { popUp: boolean }) => {
-	if (key.popUp) {
+api.storage.getStorageItems(['popUp'], ({ popUp }: StorageItems) => {
+	if (popUp) {
 		api.browserAction.setBrowserActionPopup('../popup.html');
 	} else {
 		api.browserAction.setBrowserActionPopup('');
@@ -18,61 +20,42 @@ api.storage.getStorageItems(['popUp'], (key: { popUp: boolean }) => {
 });
 
 api.browserAction.onClicked(() => {
-	let clipboard: boolean;
-	let password: string;
 	let totp: TOTP;
 
 	api.storage.getStorageItems(
 		['secret', 'pass', 'clipboard'],
-		(key: { secret: string; pass: string; clipboard: boolean }) => {
-			if (!key.secret) {
+		({ secret, pass, clipboard }: StorageItems) => {
+			if (!secret) {
 				api.runtime.openOptionsPage();
+				return;
 			}
-
-			clipboard = key.clipboard;
-
-			password = key.pass ? key.pass : '';
 
 			if (!totp) {
-				totp = new TOTP(key.secret);
+				totp = new TOTP(secret);
 			}
+
+			const passWithOtp = (pass ?? '') + totp?.getOTP();
 
 			if (clipboard) {
-				return copyToClipboard(password + totp?.getOTP());
+				copyToClipboard(passWithOtp);
+				return;
 			}
 
-			fillInput(password, totp?.getOTP());
+			fillInput(passWithOtp);
 		}
 	);
 });
 
-api.runtime.onMessage(function (request, sender) {
-	if (request.setting == 'popup') {
-		api.browserAction.setBrowserActionPopup('../popup.html');
-	}
-
-	if (request.setting == 'click') {
-		api.browserAction.setBrowserActionPopup('');
-	}
-});
-
-api.runtime.onMessage((msg, sender) => {
-	return new Promise((resolve) => {
-		if (msg.user) {
-			const input: HTMLInputElement = document.querySelectorAll("input[type='password']")[0] as HTMLInputElement;
-
-			if (!input) {
-				alert('No he encontrado donde poner la contraseña ☹️');
-				resolve('No input element found');
-			} else {
-				input.value = msg.user.password + msg.user.otp;
-				const form = input.closest('form');
-				form.submit();
-
-				resolve(input?.value);
-			}
-		} else {
-			resolve(null);
+api.runtime.onMessage(function(request: RuntimeMessage, sender) {
+	if (request.id === RuntimeMessageId.ModeSetting) {
+		if (request.payload.setting == 'popup') {
+			api.browserAction.setBrowserActionPopup('../popup.html');
 		}
-	});
+
+		if (request.payload.setting == 'click') {
+			api.browserAction.setBrowserActionPopup('');
+		}
+	}
+
 });
+

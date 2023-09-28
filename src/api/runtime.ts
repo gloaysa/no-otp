@@ -35,7 +35,6 @@ function getBackgroundPage(callback: (backgroundPage: any) => void): void {
  * Open the options page of the extension, if defined in the manifest.
  */
 function openOptionsPage(): void {
-	console.log('here')
 	if (typeof browser !== 'undefined' && browser.runtime) {
 		// Firefox WebExtensions API
 		browser.runtime.openOptionsPage();

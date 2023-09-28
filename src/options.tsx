@@ -4,16 +4,18 @@ import { QrReader } from 'react-qr-reader';
 import { api } from './api';
 import { useTranslation } from 'react-i18next';
 import './i18n/i18n';
+import { StorageItems } from './interfaces/storage-items.interface';
+import { RuntimeMessage, RuntimeMessageId } from './interfaces/runtime-message.interface';
 
 const Options = () => {
 	const toptRegex =
 		'otpauth:\\/\\/([ht]otp)\\/(?:[a-zA-Z0-9%]+:)?([^\\?]+)\\?secret=([0-9A-Za-z]+)(?:.*(?:<?counter=)([0-9]+))?';
 
-	const [pass, setPass] = useState<string>('');
-	const [secret, setSecret] = useState<string>('');
-	const [clipboard, setClipboard] = useState<boolean>(false);
-	const [popUp, setPopUp] = useState<boolean>(false);
-	const [fillInput, setFillInput] = useState<boolean>(!popUp && !clipboard);
+	const [pass, setPass] = useState<StorageItems['pass']>('');
+	const [secret, setSecret] = useState<StorageItems['secret']>('');
+	const [clipboard, setClipboard] = useState<StorageItems['clipboard']>(false);
+	const [popUp, setPopUp] = useState<StorageItems['popUp']>(false);
+	const [fillInput, setFillInput] = useState<StorageItems['fillInput']>(!popUp && !clipboard);
 
 	const [status, setStatus] = useState<string>('');
 	const [displayQr, setDisplayQr] = useState<boolean>(false);
@@ -26,7 +28,7 @@ const Options = () => {
 	useEffect(() => {
 		api.storage.getStorageItems(
 			['secret', 'pass', 'clipboard', 'popUp'],
-			(key: { secret: string; pass: string; clipboard: boolean; popUp: boolean }) => {
+			(key: StorageItems) => {
 				if (!secret) {
 					setPass(key.pass ? key.pass : '');
 					setSecret(key.secret ? key.secret : '');
@@ -45,14 +47,15 @@ const Options = () => {
 	}, [clipboard, popUp]);
 
 	const saveOptions = () => {
-		api.storage.setStorageItems({ pass, secret, clipboard, popUp }, () => {
+		const options: StorageItems = { pass, secret, clipboard, popUp, fillInput };
+		api.storage.setStorageItems(options, () => {
 			let timeoutId: NodeJS.Timeout;
-			let message: { setting: string };
+			let message: RuntimeMessage;
 
 			if (popUp) {
-				message = { setting: 'popup' };
+				message = { id: RuntimeMessageId.ModeSetting, payload: { setting: 'popup' } };
 			} else {
-				message = { setting: 'click' };
+				message = { id: RuntimeMessageId.ModeSetting, payload: { setting: 'click' } };
 			}
 
 			api.runtime.sendMessage(message, () => {
