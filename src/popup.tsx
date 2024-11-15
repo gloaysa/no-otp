@@ -40,15 +40,17 @@ const Popup = () => {
 		setTheme(newTheme);
 	}
 
-	const fillOtp = () => {
+	const fillOtp = async () => {
 		setOtp(totp.otp);
 		const passWithOtp = (password ?? '') + totp?.getOTP();
-		fillInput(passWithOtp);
+		await fillInput(passWithOtp);
+		window.close();
 	};
 
-	const copyOtpToClipboard = () => {
+	const copyOtpToClipboard = async () => {
 		const passWithOtp = (password ?? '') + totp?.getOTP();
-		copyToClipboard(passWithOtp);
+		await copyToClipboard(passWithOtp);
+		window.close();
 	};
 
 	const goToOptions = () => {

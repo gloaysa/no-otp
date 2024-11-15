@@ -14,10 +14,7 @@ module.exports = {
 		filename: '[name].js',
 	},
 	optimization: {
-		splitChunks: {
-			name: 'vendor',
-			chunks: 'initial',
-		},
+		splitChunks: false,
 	},
 	module: {
 		rules: [

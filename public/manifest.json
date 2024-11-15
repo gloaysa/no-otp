@@ -1,8 +1,9 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "NO+OTP",
 	"description": "Add to the input your password + OTP",
-	"version": "3.0",
+	"version": "3.1",
+	"action": {},
 	"options_ui": {
 		"page": "options.html",
     "browser_style": false,
@@ -22,7 +23,8 @@
 		"default_title": "NO+OTP"
 	},
 	"background": {
-		"page": "index.html"
+		"service_worker": "js/index.js",
+		"type": "module"
 	},
-	"permissions": ["storage", "activeTab", "clipboardWrite"]
+	"permissions": ["storage", "activeTab", "clipboardWrite", "offscreen", "scripting"]
 }

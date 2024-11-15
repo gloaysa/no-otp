@@ -10,6 +10,13 @@ import { RuntimeMessage, RuntimeMessageId } from './interfaces/runtime-message.i
 	pass: null,
 	secret: null,
 });*/
+self.addEventListener('install', (event) => {
+	console.log('Service Worker installed');
+});
+
+self.addEventListener('activate', (event) => {
+	console.log('Service Worker activated');
+});
 
 api.storage.getStorageItems(['popUp'], ({ popUp }: StorageItems) => {
 	if (popUp) {
@@ -24,7 +31,7 @@ api.browserAction.onClicked(() => {
 
 	api.storage.getStorageItems(
 		['secret', 'pass', 'clipboard'],
-		({ secret, pass, clipboard }: StorageItems) => {
+		async ({ secret, pass, clipboard }: StorageItems) => {
 			if (!secret) {
 				api.runtime.openOptionsPage();
 				return;
@@ -37,11 +44,11 @@ api.browserAction.onClicked(() => {
 			const passWithOtp = (pass ?? '') + totp?.getOTP();
 
 			if (clipboard) {
-				copyToClipboard(passWithOtp);
+				await copyToClipboard(passWithOtp);
 				return;
 			}
 
-			fillInput(passWithOtp);
+			await fillInput(passWithOtp);
 		}
 	);
 });

@@ -14,9 +14,9 @@ function setBrowserActionPopup(popup: string): Promise<void> {
 				.catch((error) => {
 					reject(error);
 				});
-		} else if (typeof chrome !== 'undefined' && chrome.browserAction) {
+		} else if (typeof chrome !== 'undefined' && chrome.action) {
 			// Chrome Extension API
-			chrome.browserAction.setPopup({ popup }, () => {
+			chrome.action.setPopup({ popup }, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
@@ -45,9 +45,9 @@ function setBrowserActionTitle(title: string): Promise<void> {
 				.catch((error) => {
 					reject(error);
 				});
-		} else if (typeof chrome !== 'undefined' && chrome.browserAction) {
+		} else if (typeof chrome !== 'undefined' && chrome.action) {
 			// Chrome Extension API
-			chrome.browserAction.setTitle({ title }, () => {
+			chrome.action.setTitle({ title }, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
@@ -68,9 +68,9 @@ function onClicked(listener: () => void): void {
 	if (typeof browser !== 'undefined' && browser.browserAction) {
 		// Firefox WebExtensions API
 		browser.browserAction.onClicked.addListener(listener);
-	} else if (typeof chrome !== 'undefined' && chrome.browserAction) {
+	} else if (typeof chrome !== 'undefined' && chrome.action) {
 		// Chrome Extension API
-		chrome.browserAction.onClicked.addListener(listener);
+		chrome.action.onClicked.addListener(listener);
 	} else {
 		console.error('Unsupported browser.');
 	}
