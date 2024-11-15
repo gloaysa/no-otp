@@ -306,7 +306,7 @@ const Options = () => {
 					</p>
 					<div className="tags has-addons level-item">
 						<span className='tag is-rounded is-info'>{t('footer.lastUpdate')}</span>
-						<span className='tag is-rounded'>09 - 2023</span>
+						<span className='tag is-rounded'>11 - 2024</span>
 					</div>
 				</div>
 			</footer>
