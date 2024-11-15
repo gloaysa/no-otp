@@ -5,7 +5,7 @@ export default class TOTP {
 	public user: string
 
 	private error_mess: string
-	private otp: number
+	private otp: string
 	private countDown: number
 	private log: boolean
 	private countDownCallback: Function | null
@@ -16,7 +16,7 @@ export default class TOTP {
 	constructor(key, user = 'user@example.com') {
 		this.key = key
 		this.error_mess = ''
-		this.otp = 0
+		this.otp = '0'
 		this.countDown = 0
 		this.log = false
 		this.countDownCallback = null
@@ -97,7 +97,7 @@ export default class TOTP {
 
 		let otp = (this.hex2dec(hmac.substr(offset * 2, 8)) & this.hex2dec('7fffffff')) + ''
 		otp = otp.substr(otp.length - 6, 6)
-		this.otp = parseInt(otp)
+		this.otp = otp;
 		if (this.log) console.log('New OTP: ' + this.otp)
 		if (typeof this.updateCallback === 'function') {
 			this.updateCallback(this)
